@@ -35,14 +35,11 @@ import matplotlib.pyplot as plt
 import timeit
 from datetime import datetime
 
-from utils import *
-
 # global configs and params
 random_seed = 0
 test_size = 0.2
 fig_label_font = 'Libertinus Sans'
 fig_legend_font = 'Libertinus Sans'
-experimentDate = '2019-10-25'
 np.random.seed(random_seed)
 
 
