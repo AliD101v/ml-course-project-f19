@@ -1,6 +1,6 @@
 import pandas as pd
 
-def load_WDBC(return_X_y=False):
+def load_WDBC():
     # Read the dataset 
     featureNames_org = ['Radius', 'Texture', 'Perimeter', 'Area', 'Smoothness', 'Compactness', 'Concavity', 'Concave points', 'Symmetry', 'Fractal dimension']
     featureNames = [f'{s} (M)' for s in featureNames_org]
