@@ -21,8 +21,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split, GridSearchCV
 # metrics
 from sklearn import metrics
-from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score,\
+                            precision_recall_fscore_support
 # estimators
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
@@ -144,15 +144,33 @@ classifiers = [
     DecisionTreeClassifier(),
     RandomForestClassifier(),
     AdaBoostClassifier(),
-    MLPClassifier()]
+    MLPClassifier()
+    ]
+
+results = []
 
 for classifier in classifiers:
     pipe = Pipeline(steps=[('preprocessor', preprocessor),
                     ('classifier', classifier)])
-    pipe.fit(X_train, y_train)   
-    print(classifier)
-    print("model score: %.3f" % pipe.score(X_test, y_test))
-    print('==================================================')
+    pipe.fit(X_train, y_train)
+    y_pred = pipe.predict(X_test)
+    precision, recall, f1, _ = \
+        precision_recall_fscore_support(y_test, y_pred, average='micro')
+
+    result = {
+                'Classifier': classifier.__class__.__name__,
+                'Score': pipe.score(X_test, y_test),
+                'Accuracy': accuracy_score(y_test, y_pred),
+                'f1 score': f1,
+                'Precision': precision,
+                'Recall': recall
+            }
+    results.append(result)
+
+results_df = pd.DataFrame(data=results, index=None,
+                        columns=['Classifier', 'Score', 'Accuracy',
+                        'f1 score', 'Precision', 'Recall'])
+results_df.index = [''] * len(results_df)
 
 # ## 3.3 Hyperparameter tuning
 
@@ -172,4 +190,6 @@ for classifier in classifiers:
 
 # # 4. Output
 # ## 4.1 Results
+# Jupyter Notebook
+display(results_df.sort_values(by=['Score'], ascending=False))
 # ## 4.1 Figures
