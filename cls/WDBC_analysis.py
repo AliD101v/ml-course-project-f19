@@ -52,3 +52,10 @@ np.random.seed(random_seed)
 df = load_WDBC()
 # print(df.describe())
 
+# ────────────────────────────────────────────────────────────────────────────────
+# # 2. Split the dataset(s) into training and test
+X = df[df.columns[1:]]
+y = df[df.columns[0]]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,
+                                    random_state=random_seed)
+
