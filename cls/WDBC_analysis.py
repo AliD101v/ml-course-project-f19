@@ -155,7 +155,9 @@ grid_params = {
         {
             'KNeighborsClassifier__n_neighbors': [3, 4, 5]
         },
-        'GaussianNB':{},
+        'GaussianNB':{
+            'GaussianNB__var_smoothing': list(np.logspace(-10, 0, num=11, base=10)),
+        },
         'SVC':
         {
             'SVC__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
@@ -165,8 +167,8 @@ grid_params = {
         'DecisionTreeClassifier':
         {
             'DecisionTreeClassifier__criterion': ['gini', 'entropy'],
-            'DecisionTreeClassifier__splitter': ['best', 'random'],
-            # 'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            # 'DecisionTreeClassifier__splitter': ['best', 'random'],
             # 'DecisionTreeClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
             # 'DecisionTreeClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
             # 'DecisionTreeClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
@@ -175,20 +177,24 @@ grid_params = {
         {
             'RandomForestClassifier__n_estimators': list(np.arange(10, 101)),
             'RandomForestClassifier__criterion': ['gini', 'entropy'],
+            'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
             # 'RandomForestClassifier__splitter': ['best', 'random'],
-            # 'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
             # 'RandomForestClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
             # 'RandomForestClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
             # 'RandomForestClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
         },
         'AdaBoostClassifier':
         {
-
+            'AdaBoostClassifier__n_estimators': list(np.arange(10, 51)),
+            'AdaBoostClassifier__learning_rate': list(np.linspace(0.1, 1, 10, endpoint=True)),
         },
         'MLPClassifier':
         {
             'MLPClassifier__activation': ['identity', 'logistic', 'tanh', 'relu'],
             'MLPClassifier__solver': ['lbfgs', 'sgd', 'adam'],
+            'MLPClassifier__hidden_layer_sizes': [(1,)] + [(i,) for i in np.arange(10, 101, 10)],
+            'MLPClassifier__learning_rate': ['constant', 'invscaling', 'adaptive'],
+            'MLPClassifier__max_iter': list(np.arange(100, 501, 50)),
             
         }
     }
