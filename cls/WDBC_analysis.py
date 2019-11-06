@@ -137,29 +137,90 @@ preprocessor = ColumnTransformer(
 # ```
 
 classifiers = [
-    LogisticRegression(),
-    KNeighborsClassifier(3),
+    LogisticRegression(random_state=random_seed),
+    KNeighborsClassifier(),
     GaussianNB(),
-    SVC(kernel="rbf", C=0.025, probability=True),
-    DecisionTreeClassifier(),
-    RandomForestClassifier(),
-    AdaBoostClassifier(),
-    MLPClassifier()
+    SVC(probability=True, random_state=random_seed),
+    DecisionTreeClassifier(random_state=random_seed),
+    RandomForestClassifier(random_state=random_seed),
+    AdaBoostClassifier(random_state=random_seed),
+    MLPClassifier(random_state=random_seed)
     ]
+
+grid_params = {
+        'LogisticRegression':{ 
+        'LogisticRegression__solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+        },
+        'KNeighborsClassifier':
+        {
+            'KNeighborsClassifier__n_neighbors': [3, 4, 5]
+        },
+        'GaussianNB':{},
+        'SVC':
+        {
+            'SVC__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+            'SVC__C': list(np.logspace(-5, 15, num=11, base=2)),
+            'SVC__gamma': list(np.logspace(-15, 3, num=10, base=2)),
+        },
+        'DecisionTreeClassifier':
+        {
+            'DecisionTreeClassifier__criterion': ['gini', 'entropy'],
+            'DecisionTreeClassifier__splitter': ['best', 'random'],
+            # 'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            # 'DecisionTreeClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+            # 'DecisionTreeClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            # 'DecisionTreeClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        },
+        'RandomForestClassifier':
+        {
+            'RandomForestClassifier__n_estimators': list(np.arange(10, 101)),
+            'RandomForestClassifier__criterion': ['gini', 'entropy'],
+            # 'RandomForestClassifier__splitter': ['best', 'random'],
+            # 'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            # 'RandomForestClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+            # 'RandomForestClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            # 'RandomForestClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        },
+        'AdaBoostClassifier':
+        {
+
+        },
+        'MLPClassifier':
+        {
+            'MLPClassifier__activation': ['identity', 'logistic', 'tanh', 'relu'],
+            'MLPClassifier__solver': ['lbfgs', 'sgd', 'adam'],
+            
+        }
+    }
 
 results = []
 
 for classifier in classifiers:
     pipe = Pipeline(steps=[('preprocessor', preprocessor),
-                    ('classifier', classifier)])
-    pipe.fit(X_train, y_train)
-    y_pred = pipe.predict(X_test)
+                    (classifier.__class__.__name__, classifier)])
+
+    # Perform a grid search on the entire pipeline of the current classifier
+    # Note: to disable the grid search, comment the following three lines,
+    # and call fit() and predict() directly on the pipe object
+    grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
+    grid_clf.fit(X_train, y_train)
+
+    # best params are stored in the grid_clf.best_params_ object:
+    ## print(grid_clf.best_params_)
+    
+    # store the best classifier for each classifier
+    best_pipe = grid_clf.best_estimator_
+
+    # just a piece of code in case we need access to the classifier in the pipe
+    ## print(best_pipe[classifier.__class__.__name__])
+
+    y_pred = best_pipe.predict(X_test)
     precision, recall, f1, _ = \
         precision_recall_fscore_support(y_test, y_pred, average='micro')
 
     result = {
                 'Classifier': classifier.__class__.__name__,
-                'Score': pipe.score(X_test, y_test),
+                'Score': best_pipe.score(X_test, y_test),
                 'Accuracy': accuracy_score(y_test, y_pred),
                 'f1 score': f1,
                 'Precision': precision,
@@ -172,16 +233,19 @@ results_df = pd.DataFrame(data=results, index=None,
                         'f1 score', 'Precision', 'Recall'])
 results_df.index = [''] * len(results_df)
 
+
 # ## 3.3 Hyperparameter tuning
 
 
 # Exampel:
 # ```python
-# param_grid = { 
+# grid_param = { 
 #     'classifier__n_estimators': [200, 500],
 #     'classifier__max_features': ['auto', 'sqrt', 'log2'],
 #     'classifier__max_depth' : [4,5,6,7,8],
-#     'classifier__criterion' :['gini', 'entropy']}from sklearn.model_selection import GridSearchCVCV = GridSearchCV(rf, param_grid, n_jobs= 1)
+#     'classifier__criterion' :['gini', 'entropy']}
+# from sklearn.model_selection import GridSearchCV
+# CV = GridSearchCV(rf, grid_param, n_jobs= 1)
                   
 # CV.fit(X_train, y_train)  
 # print(CV.best_params_)    
