@@ -233,7 +233,7 @@ for classifier in classifiers:
 
     result = {
                 'Classifier': classifier.__class__.__name__,
-                'Score': pipe.score(X_test, y_test),
+                'Score': best_pipe.score(X_test, y_test),
                 'Accuracy': accuracy_score(y_test, y_pred),
                 'f1 score': f1,
                 'Precision': precision,
