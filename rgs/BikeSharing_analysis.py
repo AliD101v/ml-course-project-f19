@@ -21,8 +21,13 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split, GridSearchCV
 # metrics
 from sklearn import metrics
-from sklearn.metrics import accuracy_score,\
-                            precision_recall_fscore_support
+from sklearn.metrics import explained_variance_score,\
+                            max_error,\
+                            mean_absolute_error,\
+                            mean_squared_error,\
+                            mean_squared_log_error,\
+                            median_absolute_error,\
+                            r2_score
 # estimators
 from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
@@ -104,7 +109,6 @@ numeric_transformer = Pipeline(steps=[
 #         ('num', numeric_transformer, numeric_features),
 #         ('cat', categorical_transformer, categorical_features)])
 # ```
-
 numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
 # categorical_features = df.select_dtypes(include=['object']).columns
 
@@ -221,22 +225,22 @@ for classifier in classifiers:
     ## print(best_pipe[classifier.__class__.__name__])
 
     y_pred = pipe.predict(X_test)
-    precision, recall, f1, _ = \
-        precision_recall_fscore_support(y_test, y_pred, average='micro')
 
     result = {
                 'Classifier': classifier.__class__.__name__,
                 'Score': pipe.score(X_test, y_test),
-                'Accuracy': accuracy_score(y_test, y_pred),
-                'f1 score': f1,
-                'Precision': precision,
-                'Recall': recall
+                'Explained variance score': explained_variance_score(y_test, y_pred),
+                'Max error': max_error(y_test, y_pred),
+                'Mean absolute error': mean_absolute_error(y_test, y_pred),
+                'Mean squared error': mean_squared_error(y_test, y_pred),
+                # 'Mean squared logarithmic error': mean_squared_log_error(y_test, y_pred),
+                'Median absolute error': median_absolute_error(y_test, y_pred),
+                'R^2 score': r2_score(y_test, y_pred)
             }
     results.append(result)
 
 results_df = pd.DataFrame(data=results, index=None,
-                        columns=['Classifier', 'Score', 'Accuracy',
-                        'f1 score', 'Precision', 'Recall'])
+                        columns=['Classifier', 'Score', 'Explained variance score', 'Max error', 'Mean absolute error', 'Mean squared error', 'Median absolute error', 'R^2 score'])
 results_df.index = [''] * len(results_df)
 
 
