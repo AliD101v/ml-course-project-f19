@@ -211,24 +211,24 @@ for classifier in classifiers:
     # Perform a grid search on the entire pipeline of the current classifier
     # Note: to disable the grid search, comment the following three lines,
     # and call fit() and predict() directly on the pipe object
-    # grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
-    # grid_clf.fit(X_train, y_train)
-    pipe.fit(X_train, y_train)
+    grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
+    grid_clf.fit(X_train, y_train)
+    # pipe.fit(X_train, y_train)
 
     # best params are stored in the grid_clf.best_params_ object:
     ## print(grid_clf.best_params_)
     
     # store the best classifier for each classifier
-    # best_pipe = grid_clf.best_estimator_
+    best_pipe = grid_clf.best_estimator_
 
     # just a piece of code in case we need access to the classifier in the pipe
     ## print(best_pipe[classifier.__class__.__name__])
 
-    y_pred = pipe.predict(X_test)
+    y_pred = best_pipe.predict(X_test)
 
     result = {
                 'Classifier': classifier.__class__.__name__,
-                'Score': pipe.score(X_test, y_test),
+                'Score': best_pipe.score(X_test, y_test),
                 'Explained variance score': explained_variance_score(y_test, y_pred),
                 'Max error': max_error(y_test, y_pred),
                 'Mean absolute error': mean_absolute_error(y_test, y_pred),
