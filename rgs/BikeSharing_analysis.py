@@ -24,13 +24,13 @@ from sklearn import metrics
 from sklearn.metrics import accuracy_score,\
                             precision_recall_fscore_support
 # estimators
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel, RBF
+from sklearn.linear_model import LinearRegression
+from sklearn.neural_network import MLPRegressor
 # scipy
 import scipy
 from scipy.sparse import csr_matrix
@@ -141,65 +141,60 @@ preprocessor = ColumnTransformer(
 # ```
 
 classifiers = [
-    LogisticRegression(random_state=random_seed),
-    KNeighborsClassifier(),
-    GaussianNB(),
-    SVC(probability=True, random_state=random_seed),
-    DecisionTreeClassifier(random_state=random_seed),
-    RandomForestClassifier(random_state=random_seed),
-    AdaBoostClassifier(random_state=random_seed),
-    MLPClassifier(random_state=random_seed)
+    SVR(),
+    DecisionTreeRegressor(random_state=random_seed),
+    RandomForestRegressor(random_state=random_seed),
+    AdaBoostRegressor(random_state=random_seed),
+    GaussianProcessRegressor(random_state=random_seed),
+    LinearRegression(),
+    MLPRegressor(random_state=random_seed)
     ]
 
 grid_params = {
-        'LogisticRegression':{ 
-        'LogisticRegression__solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
-        },
-        'KNeighborsClassifier':
+        'SVR':
         {
-            'KNeighborsClassifier__n_neighbors': [3, 4, 5]
+            'SVR__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+            'SVR__C': list(np.logspace(-5, 15, num=11, base=2)),
+            'SVR__gamma': list(np.logspace(-15, 3, num=10, base=2)),
         },
-        'GaussianNB':{
-            'GaussianNB__var_smoothing': list(np.logspace(-10, 0, num=11, base=10)),
-        },
-        'SVC':
+        'DecisionTreeRegressor':
         {
-            'SVC__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
-            'SVC__C': list(np.logspace(-5, 15, num=11, base=2)),
-            'SVC__gamma': list(np.logspace(-15, 3, num=10, base=2)),
+            'DecisionTreeRegressor__criterion': ['mse', 'friedman_mse', 'mae'],
+            'DecisionTreeRegressor__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            # 'DecisionTreeRegressor__splitter': ['best', 'random'],
+            # 'DecisionTreeRegressor__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+            # 'DecisionTreeRegressor__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            # 'DecisionTreeRegressor__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
         },
-        'DecisionTreeClassifier':
+        'RandomForestRegressor':
         {
-            'DecisionTreeClassifier__criterion': ['gini', 'entropy'],
-            'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
-            # 'DecisionTreeClassifier__splitter': ['best', 'random'],
-            # 'DecisionTreeClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
-            # 'DecisionTreeClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-            # 'DecisionTreeClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            'RandomForestRegressor__n_estimators': list(np.arange(10, 101)),
+            'RandomForestRegressor__criterion': ['mse', 'mae'],
+            'RandomForestRegressor__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            # 'RandomForestRegressor__splitter': ['best', 'random'],
+            # 'RandomForestRegressor__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+            # 'RandomForestRegressor__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            # 'RandomForestRegressor__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
         },
-        'RandomForestClassifier':
+        'AdaBoostRegressor':
         {
-            'RandomForestClassifier__n_estimators': list(np.arange(10, 101)),
-            'RandomForestClassifier__criterion': ['gini', 'entropy'],
-            'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
-            # 'RandomForestClassifier__splitter': ['best', 'random'],
-            # 'RandomForestClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
-            # 'RandomForestClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-            # 'RandomForestClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            'AdaBoostRegressor__n_estimators': list(np.arange(10, 51)),
+            'AdaBoostRegressor__learning_rate': list(np.linspace(0.1, 1, 10, endpoint=True)),
         },
-        'AdaBoostClassifier':
-        {
-            'AdaBoostClassifier__n_estimators': list(np.arange(10, 51)),
-            'AdaBoostClassifier__learning_rate': list(np.linspace(0.1, 1, 10, endpoint=True)),
+        'GaussianProcessRegressor':{
+            'GaussianProcessRegressor__kernel': [1.0*RBF(1.0), DotProduct() + WhiteKernel()],
+            'GaussianProcessRegressor__alpha': list(np.linspace(1e-20, 1, 20, endpoint=True)),
+            'GaussianProcessRegressor__normalize_y': [True, False],
         },
-        'MLPClassifier':
+        'LinearRegression':{ 
+        },
+        'MLPRegressor':
         {
-            'MLPClassifier__activation': ['identity', 'logistic', 'tanh', 'relu'],
-            'MLPClassifier__solver': ['lbfgs', 'sgd', 'adam'],
-            'MLPClassifier__hidden_layer_sizes': [(1,)] + [(i,) for i in np.arange(10, 101, 10)],
-            'MLPClassifier__learning_rate': ['constant', 'invscaling', 'adaptive'],
-            'MLPClassifier__max_iter': list(np.arange(100, 501, 50)),
-            
+            'MLPRegressor__activation': ['identity', 'logistic', 'tanh', 'relu'],
+            'MLPRegressor__solver': ['lbfgs', 'sgd', 'adam'],
+            'MLPRegressor__hidden_layer_sizes': [(1,)] + [(i,) for i in np.arange(10, 101, 10)],
+            'MLPRegressor__learning_rate': ['constant', 'invscaling', 'adaptive'],
+            'MLPRegressor__max_iter': list(np.arange(100, 501, 50)),            
         }
     }
 
