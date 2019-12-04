@@ -10,13 +10,30 @@ def load_CIFAR10():
     train = list()
     for i in range(5):
         # C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data
-        obj = unpickle(f'C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data/CIFAR-10/data_batch_{i+1}')
+        obj = unpickle(f'data/CIFAR-10/data_batch_{i+1}')
         train.append(obj)
-    test = unpickle(f'C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data/CIFAR-10/test_batch')
 
-    return train, test
+    test = unpickle(f'data/CIFAR-10/test_batch')
 
-## To test:
+    X = train[0][b'data']
+    y = train[0][b'labels']
+    y = np.asarray(y)
+
+    X_test =  test[b'data']
+    y_test = test [b'labels']
+    y_test = np.asarray(y_test)
+
+    for i in range (1,len(train)):
+        X = np.vstack((X, train[i][b'data']))
+        y = np.hstack((y, train[i][b'labels']))
+
+    # transpose the colour axis to be the inner-most one, giving the image format (H, W, C)
+    X = X.reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
+    X_test = X_test.reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
+
+    return X, y, X_test, y_test
+
+## To test [OLD]:
 # train, test = load_CIFAR10()
 # n = 5
 # print(f'First {n} records in...')
