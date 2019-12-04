@@ -136,11 +136,11 @@ classifiers = [
     LogisticRegression(random_state=random_seed,max_iter=500),
     KNeighborsClassifier(),
     GaussianNB(),
-    SVC(probability=True, random_state=random_seed),
-    DecisionTreeClassifier(random_state=random_seed),
-    RandomForestClassifier(random_state=random_seed),
-    AdaBoostClassifier(random_state=random_seed),
-    MLPClassifier(random_state=random_seed)
+    SVC(probability=True, random_state=random_seed)
+    # DecisionTreeClassifier(random_state=random_seed),
+    # RandomForestClassifier(random_state=random_seed),
+    # AdaBoostClassifier(random_state=random_seed),
+    # MLPClassifier(random_state=random_seed)
     ]
 
 grid_params = {
@@ -159,31 +159,31 @@ grid_params = {
             'SVC__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
             'SVC__C': list(np.logspace(-5, 15, num=11, base=2)),
             'SVC__gamma': list(np.logspace(-15, 3, num=10, base=2)),
-        },
-        'DecisionTreeClassifier':
-        {
-            'DecisionTreeClassifier__criterion': ['gini', 'entropy'],
-            'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
-            # 'DecisionTreeClassifier__splitter': ['best', 'random'],
-            # 'DecisionTreeClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
-            # 'DecisionTreeClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-            # 'DecisionTreeClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-        },
-        'RandomForestClassifier':
-        {
-            'RandomForestClassifier__n_estimators': list(np.arange(10, 101)),
-            'RandomForestClassifier__criterion': ['gini', 'entropy'],
-            'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
-            # 'RandomForestClassifier__splitter': ['best', 'random'],
-            # 'RandomForestClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
-            # 'RandomForestClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-            # 'RandomForestClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-        },
-        'AdaBoostClassifier':
-        {
-            'AdaBoostClassifier__n_estimators': list(np.arange(10, 51)),
-            'AdaBoostClassifier__learning_rate': list(np.linspace(0.1, 1, 10, endpoint=True)),
         }
+        # 'DecisionTreeClassifier':
+        # {
+        #     'DecisionTreeClassifier__criterion': ['gini', 'entropy'],
+        #     'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+        #     # 'DecisionTreeClassifier__splitter': ['best', 'random'],
+        #     # 'DecisionTreeClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+        #     # 'DecisionTreeClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        #     # 'DecisionTreeClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        # },
+        # 'RandomForestClassifier':
+        # {
+        #     'RandomForestClassifier__n_estimators': list(np.arange(10, 101)),
+        #     'RandomForestClassifier__criterion': ['gini', 'entropy'],
+        #     'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+        #     # 'RandomForestClassifier__splitter': ['best', 'random'],
+        #     # 'RandomForestClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+        #     # 'RandomForestClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        #     # 'RandomForestClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        # },
+        # 'AdaBoostClassifier':
+        # {
+        #     'AdaBoostClassifier__n_estimators': list(np.arange(10, 51)),
+        #     'AdaBoostClassifier__learning_rate': list(np.linspace(0.1, 1, 10, endpoint=True)),
+        # }
         # ,
         # 'MLPClassifier':
         # {

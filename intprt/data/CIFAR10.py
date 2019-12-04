@@ -9,9 +9,10 @@ def unpickle(file):
 def load_CIFAR10():
     train = list()
     for i in range(5):
-        obj = unpickle(f'data/CIFAR-10/data_batch_{i+1}')
+        # C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data
+        obj = unpickle(f'C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data/CIFAR-10/data_batch_{i+1}')
         train.append(obj)
-    test = unpickle(f'data/CIFAR-10/test_batch')
+    test = unpickle(f'C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data/CIFAR-10/test_batch')
 
     return train, test
 
