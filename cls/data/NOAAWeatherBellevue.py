@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
 
 def load_NOAAWeatherBellevue():
     featureNames = ['Temperature','Dew Point','Sea Level Pressure','Visibility','Average Wind Speed','Maximum Sustained Wind Speed','Maximum Temperature','Minimum Temperature']
