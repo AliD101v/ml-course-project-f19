@@ -6,7 +6,7 @@ def unpickle(file):
         dict = pickle.load(fo, encoding='bytes')
     return dict
 
-def load_CIFAR10():
+def load_CIFAR10(transform=False):
     train = list()
     for i in range(5):
         # C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data
@@ -27,9 +27,10 @@ def load_CIFAR10():
         X = np.vstack((X, train[i][b'data']))
         y = np.hstack((y, train[i][b'labels']))
 
-    # transpose the colour axis to be the inner-most one, giving the image format (H, W, C)
-    X = X.reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
-    X_test = X_test.reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
+    if (transform):
+        # transpose the colour axis to be the inner-most one, giving the image format (H, W, C)
+        X = X.reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
+        X_test = X_test.reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
 
     return X, y, X_test, y_test
 
