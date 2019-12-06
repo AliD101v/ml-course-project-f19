@@ -12,14 +12,14 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import time
 import sys
-from data.CIFAR10 import *
+from intrprt.data.CIFAR10 import *
 
 # If you are loading a saved trained model, set `loading` to `True`,
 # and provide the correct file name and path for model name
 loading = False
-model_path = 'intrprt/CNN/model/'
+model_path = 'intrprt/model/'
 # model_name = f'cnn_{time.strftime("%Y%m%d-%H%M%S")}.pt'
-model_name = 'cnn_20191205-180009.pt'
+model_name = 'cnn_20191205.pt'
 
 #%%
 
@@ -123,5 +123,35 @@ torch.save(net.state_dict(), model_path + model_name)
 
 #%% [markdown]
 # Load a saved trained model
+net = Net()
 net.load_state_dict(torch.load(model_path + model_name))
 print(net)
+
+#%% [markdown]
+# Check the prediction against some sample images from the test data
+# print images
+num_samples = 5
+indices = np.random.randint(0, X_test.shape[0], num_samples)
+images = np.zeros((num_samples,) + transform(Image.fromarray(X_test[i])).shape)
+labels = list()
+
+for i in range(num_samples):
+    # images.append(transform(Image.fromarray(X_test[i])))
+    images[i,:] = transform(Image.fromarray(X_test[i]))
+    labels.append(classes[y_test[i]])
+
+images = torch.from_numpy(images)
+imshow(torchvision.utils.make_grid(images))
+print('Ground truth:')
+print(' '.join('%5s' % labels[j] for j in range(num_samples)))
+
+outputs = net(images.float())
+_, predicted = torch.max(outputs, 1)
+
+print('Predicted: ', ' '.join('%5s' % classes[predicted[j]]
+                              for j in range(num_samples)))
+
+#%% [markdown]
+# Calculate the accuracy on test data
+
+# %%
