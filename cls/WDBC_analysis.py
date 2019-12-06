@@ -202,7 +202,7 @@ grid_params = {
             'MLPClassifier__solver': ['lbfgs', 'sgd', 'adam'],
             'MLPClassifier__hidden_layer_sizes': [(1,)] + [(i,) for i in np.arange(10, 101, 10)],
             'MLPClassifier__learning_rate': ['constant', 'invscaling', 'adaptive'],
-            'MLPClassifier__max_iter': list(np.arange(100, 501, 50)),
+            'MLPClassifier__max_iter': list(np.arange(300, 501, 50)),
             
         }
     }
@@ -217,13 +217,13 @@ for classifier in classifiers:
     # Note: to disable the grid search, comment the following three lines,
     # and call fit() and predict() directly on the pipe object
     if (grid_search):
-    grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
-    grid_clf.fit(X_train, y_train)
+        grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
+        grid_clf.fit(X_train, y_train)
 
-    # best params are stored in the grid_clf.best_params_ object:
-    ## print(grid_clf.best_params_)
+        # best params are stored in the grid_clf.best_params_ object:
+        ## print(grid_clf.best_params_)
     
-    # store the best classifier for each classifier
+        # store the best classifier for each classifier
         pipe = grid_clf.best_estimator_
 
         # pickle the grid object
