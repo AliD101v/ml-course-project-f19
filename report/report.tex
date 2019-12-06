@@ -1,17 +1,57 @@
 \documentclass[10pt,twocolumn,letterpaper]{article}
+%
+% ─────────────────────────────────────────────────────────────────────────────
+%   :::::: L O A D   P A C K A G E S : :  :   :    :     :        :          :
+% ────────────────────────────────────────────────────────────────────────────
+%
+
 \usepackage{cvpr}
 \usepackage{times}
 \usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage[pagebackref=true,breaklinks=true,colorlinks,bookmarks=false]{hyperref}
 
-\def\GroupID{XX} % <------- ENTER YOUR COMP6321 group number here
+%
+% ─── LANGUAGE AND FONT SETTINGS ─────────────────────────────────────────────────
+%
+% supersedes babel, http://www.ctan.org/tex-archive/macros/xetex/latex/polyglossia
+\usepackage{polyglossia} 
+\setdefaultlanguage[]{english}
+
+\usepackage{fontspec}
+\setmainfont{Libertinus Serif}[
+Ligatures={Common,TeX},
+Numbers={Lining, Proportional}
+]
+\setsansfont{Libertinus Sans}
+\setmonofont[Scale=MatchLowercase]{Libertinus Mono}
+
+\usepackage{amsmath}
+\usepackage{unicode-math}
+\setmathfont[Scale=MatchLowercase]{Libertinus Math}
+
+%% some frequently-used commands
+\newcommand{\fslining}[1]{{\addfontfeatures{Numbers=Lining}{#1}}}
+\newcommand{\fssup}[1]{{\addfontfeatures{VerticalPosition=Superior}{#1}}}
+\newcommand{\fssc}[1]{{\addfontfeatures{Letters=SmallCaps}{#1}}}
+
+% When using babel or polyglossia with biblatex, loading csquotes is recommended to ensure that quoted texts are typeset according to the rules of your main language.
+\usepackage{csquotes}
+
+% \usepackage{amssymb}
+
+%
+% ─── BIBLATEX ───────────────────────────────────────────────────────────────────
+%
+\usepackage[backend=biber,backref]{biblatex}
+\addbibresource{bibliography.bib}
+
+\usepackage[breaklinks=true,colorlinks,bookmarks=false]{hyperref}
+
+\def\GroupID{29} % <------- ENTER YOUR COMP6321 group number here
 
 \begin{document}
 \title{What {\em is} the Best Classifier?\\
        What {\em is} the Best Regressor?}
-\author{Name 1 \and Name 2 \and Name 3\\(if applicable) \and Name 4\\(if applicable)}
+\author{Ali Alizadeh Mansouri \and Kunal Singh \and Sidhant Gupta}
 \maketitle
 
 \begin{abstract}
@@ -235,9 +275,8 @@ and we can now refer back to~\eqref{xvec} or to ~\eqref{phivec} like so.
 
 
 
-{\small
-\bibliographystyle{cvpr_bibstyle}
-\bibliography{bibliography}
-}
+%  \clearpage
+% {\footnotesize \bibliography{refs}}
+\printbibliography[heading=bibintoc]
 
 \end{document}
