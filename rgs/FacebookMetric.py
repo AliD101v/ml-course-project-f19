@@ -50,7 +50,7 @@ import timeit
 from datetime import datetime
 
 # import dataloading file
-from ipynb.fs.full.facebookMetricData import load_facebookMetric
+from data.facebookMetricData import *
 # global configs and params
 random_seed = 0
 test_size = 0.2

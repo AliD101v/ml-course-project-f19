@@ -49,7 +49,7 @@ import matplotlib.pyplot as plt
 import timeit
 from datetime import datetime
 
-from YeastData import load_yeastData
+from data.YeastData import *
 
 # global configs and params
 random_seed = 0

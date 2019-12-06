@@ -50,7 +50,7 @@ import timeit
 from datetime import datetime
 
 # import dataloading file
-from ipynb.fs.full.Concrete_data import load_concrete
+from data.Concrete_data import *
 # global configs and params
 random_seed = 0
 test_size = 0.2
