@@ -18,7 +18,7 @@ def load_facebookMetric():
     df[categorical_columns] = df[categorical_columns].apply( lambda x:x.cat.codes )
 
     scaler = preprocessing.StandardScaler()
-    X=df[df.columns[1:7]]
+    X=df[df.columns[1:6]]
     y=df[df.columns[7]]
     return X,y
 
