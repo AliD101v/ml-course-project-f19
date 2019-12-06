@@ -57,7 +57,7 @@ import timeit
 from datetime import datetime
 
 
-from ipynb.fs.full.GermanCreditData import load_GermanCredit
+from data.GermanCreditData import *
 
 # global configs and params
 random_seed = 0
