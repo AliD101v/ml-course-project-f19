@@ -155,6 +155,8 @@ print('Predicted: ', ' '.join('%5s' % classes[predicted[j]]
 # Calculate the accuracy on test data
 correct = 0
 total = 0
+class_correct = list(0. for i in range(10))
+class_total = list(0. for i in range(10))
 with torch.no_grad():
     for i in range(X_test.shape[0]):
     # for i in range(10):
@@ -166,5 +168,18 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
+        # Calculate per-class accuracy
+        c = (predicted == labels).squeeze()
+        # for i in range(4):
+            # label = labels[i]
+        class_correct[labels] += c.item()
+        class_total[labels] += 1
+
 print(f'Accuracy of the network on the {X_test.shape[0]} test images: {(100 * correct / total)}%')
+
+for i in range(10):
+    print('Accuracy of %5s : %2d %%' % (
+        classes[i], 100 * class_correct[i] / class_total[i]))
+
+
 # %%
