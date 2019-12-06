@@ -34,6 +34,10 @@ def load_CIFAR10(transform=False):
 
     return X, y, X_test, y_test
 
+## To test:
+# X, y, X_test, y_test = load_CIFAR10(transform=True)
+# print(y.shape)
+
 ## To test [OLD]:
 # train, test = load_CIFAR10()
 # n = 5

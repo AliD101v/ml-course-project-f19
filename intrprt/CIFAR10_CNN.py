@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import sklearn
 from sklearn.tree import DecisionTreeClassifier
@@ -9,7 +10,18 @@ import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from PIL import Image
+import time
+import sys
 from data.CIFAR10 import *
+
+# If you are loading a saved trained model, set `loading` to `True`,
+# and provide the correct file name and path for model name
+loading = False
+model_path = 'intrprt/CNN/model/'
+# model_name = f'cnn_{time.strftime("%Y%m%d-%H%M%S")}.pt'
+model_name = 'cnn_20191205-180009.pt'
+
+#%%
 
 class Net(nn.Module):
     def __init__(self):
@@ -30,14 +42,17 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-
-net = Net()
-
 def imshow(img):
     img = img / 2 + 0.5     # unnormalize
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
+
+#%% [markdown]
+## Train the CNN
+# Create the network
+net = Net()
+
 
 #%% [markdown]
 # Load the dataset.
@@ -73,13 +88,15 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 #%% [markdown]
 # Train the convolutional neural network.
-batch_size = 1
-inputs = np.zeros((batch_size,) + X.shape[1:])
-for epoch in range(2):  # loop over the dataset multiple times
+# batch_size = 1
+epochs = 1
+# inputs = np.zeros((batch_size,) + X.shape[1:])
+for epoch in range(epochs):  # loop over the dataset multiple times
     
     running_loss = 0.0
     # for i in range(0, X.shape[0], batch_size):
-    for i in range(X.shape[0]):
+    # for i in range(X.shape[0]):
+    for i in range(10):
         inputs = torch.tensor(np.expand_dims(transform(Image.fromarray(X[i])), axis=0))
         label = torch.from_numpy(np.array([y[i]]).astype(np.int64))
 
@@ -100,3 +117,11 @@ for epoch in range(2):  # loop over the dataset multiple times
             running_loss = 0.0
 
 print('Finished Training')
+
+# save the trained model once done trianing
+torch.save(net.state_dict(), model_path + model_name)
+
+#%% [markdown]
+# Load a saved trained model
+net.load_state_dict(torch.load(model_path + model_name))
+print(net)
