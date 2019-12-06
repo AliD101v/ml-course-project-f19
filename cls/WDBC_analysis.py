@@ -277,5 +277,9 @@ results_df.index = [''] * len(results_df)
 # # 4. Output
 # ## 4.1 Results
 # Jupyter Notebook
-display(results_df.sort_values(by=['Score'], ascending=False))
+results_df = results_df.sort_values(by=['Score'], ascending=False)
+display(results_df)
+# Save the dataframe
+results_df.to_pickle(results_path + results_name)
+results_df.to_csv(results_path + results_name + '.csv')
 # ## 4.1 Figures
