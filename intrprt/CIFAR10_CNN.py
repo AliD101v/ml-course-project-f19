@@ -89,14 +89,14 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 #%% [markdown]
 # Train the convolutional neural network.
 # batch_size = 1
-epochs = 1
+epochs = 10
 # inputs = np.zeros((batch_size,) + X.shape[1:])
 for epoch in range(epochs):  # loop over the dataset multiple times
     
     running_loss = 0.0
     # for i in range(0, X.shape[0], batch_size):
-    # for i in range(X.shape[0]):
-    for i in range(10):
+    for i in range(X.shape[0]):
+    # for i in range(10):
         inputs = torch.tensor(np.expand_dims(transform(Image.fromarray(X[i])), axis=0))
         label = torch.from_numpy(np.array([y[i]]).astype(np.int64))
 
@@ -153,5 +153,18 @@ print('Predicted: ', ' '.join('%5s' % classes[predicted[j]]
 
 #%% [markdown]
 # Calculate the accuracy on test data
+correct = 0
+total = 0
+with torch.no_grad():
+    for i in range(X_test.shape[0]):
+    # for i in range(10):
+        images = torch.tensor(np.expand_dims(transform(Image.fromarray(X_test[i])), axis=0))
+        labels = torch.from_numpy(np.array([y_test[i]]).astype(np.int64))
 
+        outputs = net(images.float())
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+print(f'Accuracy of the network on the {X_test.shape[0]} test images: {(100 * correct / total)}%')
 # %%
