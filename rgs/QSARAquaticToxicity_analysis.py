@@ -10,6 +10,7 @@ from pandas.plotting import scatter_matrix
 import numpy as np
 import sklearn
 from sklearn.pipeline import Pipeline
+import pickle
 # preprocessing
 from sklearn import preprocessing
 from sklearn.impute import SimpleImputer
@@ -49,7 +50,7 @@ import matplotlib.pyplot as plt
 import timeit
 from datetime import datetime
 
-from data.QSARAquaticToxicity import *
+from rgs.data.QSARAquaticToxicity import *
 
 # global configs and params
 random_seed = 0
@@ -57,6 +58,13 @@ test_size = 0.2
 fig_label_font = 'Libertinus Sans'
 fig_legend_font = 'Libertinus Sans'
 np.random.seed(random_seed)
+grid_search = True
+
+dataset_name = 'QSARAquaticToxicity'
+results_path = 'rgs/results/'
+# results_name = f'cnn_{time.strftime("%Y%m%d-%H%M%S")}.pt'
+results_name = f'{dataset_name}_20191206'
+gridsearch_name = f'{dataset_name}_20191206'
 
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -212,24 +220,27 @@ for classifier in classifiers:
     # Perform a grid search on the entire pipeline of the current classifier
     # Note: to disable the grid search, comment the following three lines,
     # and call fit() and predict() directly on the pipe object
-    grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
-    grid_clf.fit(X_train, y_train)
-    # pipe.fit(X_train, y_train)
+    if (grid_search):
+        grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
+        grid_clf.fit(X_train, y_train)
+        # pipe.fit(X_train, y_train)
 
-    # best params are stored in the grid_clf.best_params_ object:
-    ## print(grid_clf.best_params_)
-    
-    # store the best classifier for each classifier
-    best_pipe = grid_clf.best_estimator_
+        # best params are stored in the grid_clf.best_params_ object:
+        ## print(grid_clf.best_params_)
+        
+        # store the best classifier for each classifier
+        pipe = grid_clf.best_estimator_
+    else:
+        pipe.fit(X_train, y_train)
 
     # just a piece of code in case we need access to the classifier in the pipe
-    ## print(best_pipe[classifier.__class__.__name__])
+    ## print(pipe[classifier.__class__.__name__])
 
-    y_pred = best_pipe.predict(X_test)
+    y_pred = pipe.predict(X_test)
 
     result = {
                 'Classifier': classifier.__class__.__name__,
-                'Score': best_pipe.score(X_test, y_test),
+                'Score': pipe.score(X_test, y_test),
                 'Explained variance score': explained_variance_score(y_test, y_pred),
                 'Max error': max_error(y_test, y_pred),
                 'Mean absolute error': mean_absolute_error(y_test, y_pred),
@@ -266,5 +277,9 @@ results_df.index = [''] * len(results_df)
 # # 4. Output
 # ## 4.1 Results
 # Jupyter Notebook
-display(results_df.sort_values(by=['Score'], ascending=False))
+results_df = results_df.sort_values(by=['Score'], ascending=False)
+display(results_df)
+# Save the dataframe
+results_df.to_pickle(results_path + results_name)
+results_df.to_csv(results_path + results_name + '.csv')
 # ## 4.1 Figures
