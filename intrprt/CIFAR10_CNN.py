@@ -132,7 +132,7 @@ print(net)
 # print images
 num_samples = 5
 indices = np.random.randint(0, X_test.shape[0], num_samples)
-images = np.zeros((num_samples,) + transform(Image.fromarray(X_test[i])).shape)
+images = np.zeros((num_samples,) + transform(Image.fromarray(X_test[0])).shape)
 labels = list()
 
 for i in range(num_samples):
