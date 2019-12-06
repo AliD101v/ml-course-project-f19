@@ -10,7 +10,7 @@ def load_NOAAWeatherBellevue():
     df_y = pd.read_csv('data/NOAA Weather Bellevue/NEweather_class.csv',
         delimiter=',', header=None, names=['Rain'])
 
-    return df_X, df_y
+    return df_X, df_y.values.ravel()
 
 # df_X,df_y = load_NOAAWeatherBellevue()
 # print('Features:')
