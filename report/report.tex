@@ -36,7 +36,37 @@ Numbers={Lining, Proportional}
 % When using babel or polyglossia with biblatex, loading csquotes is recommended to ensure that quoted texts are typeset according to the rules of your main language.
 \usepackage{csquotes}
 
-% \usepackage{amssymb}
+
+ %
+ % ─── USEFUL PACKAGES ────────────────────────────────────────────────────────────
+ %
+ % Load colors with names
+ \usepackage[usenames]{color}
+ % For headers 
+%  \usepackage{fancyhdr}
+ % Customize float and table captions (font size, etc.)
+ \usepackage[font=footnotesize]{caption}
+ \usepackage{subcaption}
+ \usepackage{graphicx}
+ \usepackage{booktabs}
+ %%% enumitem %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ % \begin{enumerate*}[label=\arabic*)]
+ % \end{enumerate*}
+ % \usepackage[]{enumitem}
+ \usepackage[]{enumitem}
+ % For inline lists in a paragraph:
+ % \newlist{inlinelist}{enumerate*}{1}
+ % \setlist*[inlinelist,1]{%
+ %   label=(\roman*), % or alph or arabic
+ % }
+ % % Usage
+ % \begin{inlinelist}
+ %   \item item 1
+ % \end{inlinelist}
+ 
+ % When using babel or polyglossia with biblatex, loading csquotes is recommended to ensure that quoted texts are typeset according to the rules of your main language.
+ \usepackage{csquotes}
+
 
 %
 % ─── BIBLATEX ───────────────────────────────────────────────────────────────────
@@ -44,7 +74,35 @@ Numbers={Lining, Proportional}
 \usepackage[backend=biber,backref]{biblatex}
 \addbibresource{bibliography.bib}
 
-\usepackage[breaklinks=true,colorlinks,bookmarks=false]{hyperref}
+%
+% ─── HYPERREF SETUP ─────────────────────────────────────────────────────────────
+%
+% For clickable URLS/references/etc. within the PDF document
+\usepackage[]{hyperref}
+%%% Hyperref setup %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\hypersetup{
+% pdfkeywords = {Big Data, Fog Computing},
+pdfcreator = {XeLaTeX with hyperref package},
+pdfproducer = {pdfLaTeX},
+colorlinks = true,
+breaklinks = true,
+linkcolor = blue,          % color of internal links
+citecolor = magenta,        % color of links to bibliography
+filecolor = magenta,      % color of file links
+urlcolor = blue,          % color of external links
+}
+
+% \usepackage[breaklinks=true,colorlinks,bookmarks=false]{hyperref}
+
+%
+% ─────────────────────────────────────────────────────────────────────
+%   :::::: C O M M A N D S : :  :   :    :     :        :          :
+% ──────────────────────────────────────────────────────────────────
+%
+
+\urlstyle{same}
+% This command will use lining numbers for citations
+\def\@cite#1#2{[\fslining{{#1\if@tempswa , #2\fi}]}}
 
 \def\GroupID{29} % <------- ENTER YOUR COMP6321 group number here
 
