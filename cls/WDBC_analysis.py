@@ -10,6 +10,7 @@ from pandas.plotting import scatter_matrix
 import numpy as np
 import sklearn
 from sklearn.pipeline import Pipeline
+import pickle
 # preprocessing
 from sklearn import preprocessing
 from sklearn.impute import SimpleImputer
@@ -44,7 +45,7 @@ import matplotlib.pyplot as plt
 import timeit
 from datetime import datetime
 
-from data.WDBC import *
+from cls.data.WDBC import *
 
 # global configs and params
 random_seed = 0
@@ -52,6 +53,13 @@ test_size = 0.2
 fig_label_font = 'Libertinus Sans'
 fig_legend_font = 'Libertinus Sans'
 np.random.seed(random_seed)
+grid_search = True
+
+dataset_name = 'WDBC'
+results_path = 'cls/results/'
+# results_name = f'cnn_{time.strftime("%Y%m%d-%H%M%S")}.pt'
+results_name = f'{dataset_name}_20191206'
+gridsearch_name = f'{dataset_name}_20191206'
 
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -208,6 +216,7 @@ for classifier in classifiers:
     # Perform a grid search on the entire pipeline of the current classifier
     # Note: to disable the grid search, comment the following three lines,
     # and call fit() and predict() directly on the pipe object
+    if (grid_search):
     grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
     grid_clf.fit(X_train, y_train)
 
@@ -215,18 +224,25 @@ for classifier in classifiers:
     ## print(grid_clf.best_params_)
     
     # store the best classifier for each classifier
-    best_pipe = grid_clf.best_estimator_
+        pipe = grid_clf.best_estimator_
 
-    # just a piece of code in case we need access to the classifier in the pipe
-    ## print(best_pipe[classifier.__class__.__name__])
+        # pickle the grid object
+        # Its important to use binary mode 
+        grid_file = open(results_path + gridsearch_name, 'ab') 
+        
+        # source, destination 
+        pickle.dump(grid_clf, grid_file)                      
+        grid_file.close() 
+    else:
+        pipe.fit(X_train, y_train)
 
-    y_pred = best_pipe.predict(X_test)
+    y_pred = pipe.predict(X_test)
     precision, recall, f1, _ = \
         precision_recall_fscore_support(y_test, y_pred, average='micro')
 
     result = {
                 'Classifier': classifier.__class__.__name__,
-                'Score': best_pipe.score(X_test, y_test),
+                'Score': pipe.score(X_test, y_test),
                 'Accuracy': accuracy_score(y_test, y_pred),
                 'f1 score': f1,
                 'Precision': precision,
