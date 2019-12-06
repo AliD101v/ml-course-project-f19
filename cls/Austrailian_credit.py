@@ -58,8 +58,7 @@ import timeit
 from datetime import datetime
 
 
-from ipynb.fs.full.austrailian_data import load_austrailian
-
+from data.austrailian_data import *
 
 # global configs and params
 random_seed = 0
