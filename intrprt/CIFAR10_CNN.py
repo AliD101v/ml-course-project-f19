@@ -1,4 +1,8 @@
 #%%
+# CUDA test code
+# import only for the CUDA test cell
+# from __future__ import print_function
+
 import numpy as np
 import sklearn
 from sklearn.tree import DecisionTreeClassifier
@@ -19,7 +23,7 @@ from intrprt.data.CIFAR10 import *
 loading = False
 model_path = 'intrprt/model/'
 # model_name = f'cnn_{time.strftime("%Y%m%d-%H%M%S")}.pt'
-model_name = 'cnn_20191205.pt'
+model_name = 'cnn_20191206.pt'
 
 #%%
 
@@ -48,11 +52,12 @@ def imshow(img):
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
-#%% [markdown]
-## Train the CNN
-# Create the network
-net = Net()
-
+def print_CUDA_info():
+    if device.type == 'cuda':
+        # print(torch.cuda.get_device_name(0))
+        # print('Memory Usage:')
+        print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
+        print('Cached:   ', round(torch.cuda.memory_cached(0)/1024**3,1), 'GB')
 
 #%% [markdown]
 # Load the dataset.
@@ -87,6 +92,15 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 #%% [markdown]
+# Set up CUDA device
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+net.to(device)
+print('Using device:', device)
+print(torch.cuda.get_device_name(0))
+print()
+
+print_CUDA_info()
+#%% [markdown]
 # Train the convolutional neural network.
 # batch_size = 1
 epochs = 10
@@ -97,8 +111,8 @@ for epoch in range(epochs):  # loop over the dataset multiple times
     # for i in range(0, X.shape[0], batch_size):
     for i in range(X.shape[0]):
     # for i in range(10):
-        inputs = torch.tensor(np.expand_dims(transform(Image.fromarray(X[i])), axis=0))
-        label = torch.from_numpy(np.array([y[i]]).astype(np.int64))
+        inputs = torch.tensor(np.expand_dims(transform(Image.fromarray(X[i])), axis=0)).to(device)
+        label = torch.from_numpy(np.array([y[i]]).astype(np.int64)).to(device)
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -114,6 +128,7 @@ for epoch in range(epochs):  # loop over the dataset multiple times
         if i % 2000 == 1999:    # print every 2000 mini-batches
             print('[%d, %5d] loss: %.3f' %
                   (epoch + 1, i + 1, running_loss / 2000))
+            print_CUDA_info()
             running_loss = 0.0
 
 print('Finished Training')
@@ -160,8 +175,8 @@ class_total = list(0. for i in range(10))
 with torch.no_grad():
     for i in range(X_test.shape[0]):
     # for i in range(10):
-        images = torch.tensor(np.expand_dims(transform(Image.fromarray(X_test[i])), axis=0))
-        labels = torch.from_numpy(np.array([y_test[i]]).astype(np.int64))
+        images = torch.tensor(np.expand_dims(transform(Image.fromarray(X_test[i])), axis=0)).to(device)
+        labels = torch.from_numpy(np.array([y_test[i]]).astype(np.int64)).to(device)
 
         outputs = net(images.float())
         _, predicted = torch.max(outputs.data, 1)
@@ -181,10 +196,18 @@ for i in range(10):
     print('Accuracy of %5s : %2d %%' % (
         classes[i], 100 * class_correct[i] / class_total[i]))
 
+#%% [markdown]
+# CUDA test code
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# Assuming that we are on a CUDA machine, this should print a CUDA device:
+print(device)
+
+x = torch.rand(5, 3)
+print(x)
 
 # %%
 
-# Ref: [How to visualize convolutional features in 40 lines of code](https://towardsdatascience.com/how-to-visualize-convolutional-features-in-40-lines-of-code-70b7d87b0030 "How to visualize convolutional features in 40 lines of code")
+# # Ref: [How to visualize convolutional features in 40 lines of code](https://towardsdatascience.com/how-to-visualize-convolutional-features-in-40-lines-of-code-70b7d87b0030 "How to visualize convolutional features in 40 lines of code")
 # class SaveFeatures():
 #     def __init__(self, module):
 #         self.hook = module.register_forward_hook(self.hook_fn)
