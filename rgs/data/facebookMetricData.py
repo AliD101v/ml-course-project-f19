@@ -1,16 +1,10 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[23]:
-
-
 import pandas as pd
 from sklearn import preprocessing
 
 
 def load_facebookMetric():
     
-    df = pd.read_csv("dataset_Facebook.csv",delimiter=';')
+    df = pd.read_csv("C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data/Facebook/dataset_Facebook.csv",delimiter=';')
     categorical_columns = df.select_dtypes(['category','object']).columns
 
 # convert categorical data to numeric values
@@ -21,12 +15,4 @@ def load_facebookMetric():
     X=df[df.columns[1:6]]
     y=df[df.columns[7]]
     return X,y
-
-# df.head(10)
-
-
-# In[ ]:
-
-
-
 
