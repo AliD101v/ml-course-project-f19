@@ -30,7 +30,7 @@ print(" Check X shapes  : ")
 print(X.shape)
 print(X_test.shape)
 
-cifar_decision_tree = DecisionTreeClassifier(max_depth=3, random_state=0)
+cifar_decision_tree = DecisionTreeClassifier(max_depth=10, random_state=0)
 cifar_decision_tree.fit(X, y)
 cifar_results = cifar_decision_tree.predict(X_test)
 
