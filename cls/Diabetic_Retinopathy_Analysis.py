@@ -10,6 +10,7 @@ from pandas.plotting import scatter_matrix
 import numpy as np
 import sklearn
 from sklearn.pipeline import Pipeline
+import pickle
 # preprocessing
 from sklearn import preprocessing
 from sklearn.impute import SimpleImputer
@@ -52,15 +53,29 @@ test_size = 0.2
 fig_label_font = 'Libertinus Sans'
 fig_legend_font = 'Libertinus Sans'
 np.random.seed(random_seed)
+grid_search = False
+
+dataset_name = 'Diabetic_retinopathy'
+results_path = 'cls/results/'
+# results_name = f'cnn_{time.strftime("%Y%m%d-%H%M%S")}.pt'
+results_name = f'{dataset_name}_20191206'
+gridsearch_name = f'{dataset_name}_20191206'
 
 
-#Load Data 
-# fix path issues
+# ────────────────────────────────────────────────────────────────────────────────
+# # 1. Load the dataset(s)
+# todo perform some exploratory data analysis
+# todo check for missing/NA values
 X,y = load_diabetic_data()
+# print(df.describe())
 
-# Split data into Train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
+# ────────────────────────────────────────────────────────────────────────────────
+# # 2. Split the dataset(s) into training and test
 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,
+                                    random_state=random_seed)
+
+# ────────────────────────────────────────────────────────────────────────────────
 # # 3. Pipeline
 
 # ## 3.1 Transformers
@@ -79,11 +94,8 @@ numeric_transformer = Pipeline(steps=[
 # ```python
 # categorical_transformer = Pipeline(steps=[
 #     ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-# ```
 #     ('onehot', OneHotEncoder(handle_unknown='ignore'))])
-# 
-# categorical_transformer = Pipeline(steps=[
-    # ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+# ```
 
 # ### 3.1.3 Column transformer
 # Example:
@@ -98,7 +110,6 @@ numeric_transformer = Pipeline(steps=[
 # ```
 
 numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
-# categorical_features = df.select_dtypes(include=['object']).columns
 
 preprocessor = ColumnTransformer(
     transformers=[
@@ -133,14 +144,14 @@ preprocessor = ColumnTransformer(
 # ```
 
 classifiers = [
-    LogisticRegression(random_state=random_seed,max_iter=500),
+    LogisticRegression(random_state=random_seed),
     KNeighborsClassifier(),
     GaussianNB(),
-    SVC(probability=True, random_state=random_seed)
-    # DecisionTreeClassifier(random_state=random_seed),
-    # RandomForestClassifier(random_state=random_seed),
-    # AdaBoostClassifier(random_state=random_seed),
-    # MLPClassifier(random_state=random_seed)
+    SVC(probability=True, random_state=random_seed),
+    DecisionTreeClassifier(random_state=random_seed),
+    RandomForestClassifier(random_state=random_seed),
+    AdaBoostClassifier(random_state=random_seed),
+    MLPClassifier(random_state=random_seed)
     ]
 
 grid_params = {
@@ -159,41 +170,40 @@ grid_params = {
             'SVC__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
             'SVC__C': list(np.logspace(-5, 15, num=11, base=2)),
             'SVC__gamma': list(np.logspace(-15, 3, num=10, base=2)),
-        }
-        # 'DecisionTreeClassifier':
-        # {
-        #     'DecisionTreeClassifier__criterion': ['gini', 'entropy'],
-        #     'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
-        #     # 'DecisionTreeClassifier__splitter': ['best', 'random'],
-        #     # 'DecisionTreeClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
-        #     # 'DecisionTreeClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-        #     # 'DecisionTreeClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-        # },
-        # 'RandomForestClassifier':
-        # {
-        #     'RandomForestClassifier__n_estimators': list(np.arange(10, 101)),
-        #     'RandomForestClassifier__criterion': ['gini', 'entropy'],
-        #     'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
-        #     # 'RandomForestClassifier__splitter': ['best', 'random'],
-        #     # 'RandomForestClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
-        #     # 'RandomForestClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-        #     # 'RandomForestClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
-        # },
-        # 'AdaBoostClassifier':
-        # {
-        #     'AdaBoostClassifier__n_estimators': list(np.arange(10, 51)),
-        #     'AdaBoostClassifier__learning_rate': list(np.linspace(0.1, 1, 10, endpoint=True)),
-        # }
-        # ,
-        # 'MLPClassifier':
-        # {
-        #     'MLPClassifier__activation': ['identity', 'logistic', 'tanh', 'relu'],
-        #     'MLPClassifier__solver': ['lbfgs', 'sgd', 'adam'],
-        #     'MLPClassifier__hidden_layer_sizes': [(1,)] + [(i,) for i in np.arange(10, 101, 10)],
-        #     'MLPClassifier__learning_rate': ['constant', 'invscaling', 'adaptive'],
-        #     'MLPClassifier__max_iter': list(np.arange(100, 501, 50)),
+        },
+        'DecisionTreeClassifier':
+        {
+            'DecisionTreeClassifier__criterion': ['gini', 'entropy'],
+            'DecisionTreeClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            # 'DecisionTreeClassifier__splitter': ['best', 'random'],
+            # 'DecisionTreeClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+            # 'DecisionTreeClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            # 'DecisionTreeClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        },
+        'RandomForestClassifier':
+        {
+            'RandomForestClassifier__n_estimators': list(np.arange(10, 101)),
+            'RandomForestClassifier__criterion': ['gini', 'entropy'],
+            'RandomForestClassifier__max_depth': list(np.linspace(1, 32, 32, endpoint=True)),
+            # 'RandomForestClassifier__splitter': ['best', 'random'],
+            # 'RandomForestClassifier__min_samples_split': list(np.linspace(0.1, 1.0, 10, endpoint=True)),
+            # 'RandomForestClassifier__min_samples_leaf': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+            # 'RandomForestClassifier__max_features': list(np.linspace(0.1, 0.5, 5, endpoint=True)),
+        },
+        'AdaBoostClassifier':
+        {
+            'AdaBoostClassifier__n_estimators': list(np.arange(10, 51)),
+            'AdaBoostClassifier__learning_rate': list(np.linspace(0.1, 1, 10, endpoint=True)),
+        },
+        'MLPClassifier':
+        {
+            'MLPClassifier__activation': ['identity', 'logistic', 'tanh', 'relu'],
+            'MLPClassifier__solver': ['lbfgs', 'sgd', 'adam'],
+            'MLPClassifier__hidden_layer_sizes': [(1,)] + [(i,) for i in np.arange(10, 101, 10)],
+            'MLPClassifier__learning_rate': ['constant', 'invscaling', 'adaptive'],
+            'MLPClassifier__max_iter': list(np.arange(300, 501, 50)),
             
-        # }
+        }
     }
 
 results = []
@@ -205,25 +215,33 @@ for classifier in classifiers:
     # Perform a grid search on the entire pipeline of the current classifier
     # Note: to disable the grid search, comment the following three lines,
     # and call fit() and predict() directly on the pipe object
-    grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
-    grid_clf.fit(X_train, y_train)
+    if (grid_search):
+        grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
+        grid_clf.fit(X_train, y_train)
 
-    # best params are stored in the grid_clf.best_params_ object:
-    ## print(grid_clf.best_params_)
+        # best params are stored in the grid_clf.best_params_ object:
+        ## print(grid_clf.best_params_)
     
-    # store the best classifier for each classifier
-    best_pipe = grid_clf.best_estimator_
+        # store the best classifier for each classifier
+        pipe = grid_clf.best_estimator_
 
-    # just a piece of code in case we need access to the classifier in the pipe
-    ## print(best_pipe[classifier.__class__.__name__])
+        # pickle the grid object
+        # Its important to use binary mode 
+        grid_file = open(results_path + gridsearch_name, 'ab') 
+        
+        # source, destination 
+        pickle.dump(grid_clf, grid_file)                      
+        grid_file.close() 
+    else:
+        pipe.fit(X_train, y_train)
 
-    y_pred = best_pipe.predict(X_test)
+    y_pred = pipe.predict(X_test)
     precision, recall, f1, _ = \
         precision_recall_fscore_support(y_test, y_pred, average='micro')
 
     result = {
                 'Classifier': classifier.__class__.__name__,
-                'Score': best_pipe.score(X_test, y_test),
+                'Score': pipe.score(X_test, y_test),
                 'Accuracy': accuracy_score(y_test, y_pred),
                 'f1 score': f1,
                 'Precision': precision,
@@ -258,5 +276,9 @@ results_df.index = [''] * len(results_df)
 # # 4. Output
 # ## 4.1 Results
 # Jupyter Notebook
-display(results_df.sort_values(by=['Score'], ascending=False))
+results_df = results_df.sort_values(by=['Score'], ascending=False)
+display(results_df)
+# Save the dataframe
+results_df.to_pickle(results_path + results_name)
+results_df.to_csv(results_path + results_name + '.csv')
 # ## 4.1 Figures

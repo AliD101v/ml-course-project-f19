@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 # suppress sklearn warnings
 def warn(*args, **kwargs):
     pass
@@ -16,6 +10,7 @@ from pandas.plotting import scatter_matrix
 import numpy as np
 import sklearn
 from sklearn.pipeline import Pipeline
+import pickle
 # preprocessing
 from sklearn import preprocessing
 from sklearn.impute import SimpleImputer
@@ -27,7 +22,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split, GridSearchCV
 # metrics
 from sklearn import metrics
-from sklearn.metrics import accuracy_score,                            precision_recall_fscore_support
+from sklearn.metrics import accuracy_score,\
+                            precision_recall_fscore_support
 # estimators
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
@@ -49,7 +45,7 @@ import matplotlib.pyplot as plt
 import timeit
 from datetime import datetime
 
-from data.YeastData import *
+from data.steel_plate_faults import *
 
 # global configs and params
 random_seed = 0
@@ -57,18 +53,27 @@ test_size = 0.2
 fig_label_font = 'Libertinus Sans'
 fig_legend_font = 'Libertinus Sans'
 np.random.seed(random_seed)
+grid_search = False
+
+dataset_name = 'Yeast'
+results_path = 'cls/results/'
+# results_name = f'cnn_{time.strftime("%Y%m%d-%H%M%S")}.pt'
+results_name = f'{dataset_name}_20191206'
+gridsearch_name = f'{dataset_name}_20191206'
 
 
 # ────────────────────────────────────────────────────────────────────────────────
 # # 1. Load the dataset(s)
 # todo perform some exploratory data analysis
 # todo check for missing/NA values
-X,y=load_yeastData
+X,y = load_steel_faults_data()
 # print(df.describe())
 
 # ────────────────────────────────────────────────────────────────────────────────
 # # 2. Split the dataset(s) into training and test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,random_state=random_seed)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,
+                                    random_state=random_seed)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # # 3. Pipeline
@@ -82,7 +87,6 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,ra
 #     ('scaler', StandardScaler())])
 # ```
 numeric_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='median')),
     ('scaler', StandardScaler())])
 # 
 # ### 3.1.2 Categorical (qualitative) transformer
@@ -92,9 +96,6 @@ numeric_transformer = Pipeline(steps=[
 #     ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
 #     ('onehot', OneHotEncoder(handle_unknown='ignore'))])
 # ```
-categorical_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='most_frequent')),
-    ('onehot', OneHotEncoder(handle_unknown='ignore', sparse=False))])
 
 # ### 3.1.3 Column transformer
 # Example:
@@ -108,13 +109,11 @@ categorical_transformer = Pipeline(steps=[
 #         ('cat', categorical_transformer, categorical_features)])
 # ```
 
-numeric_features = X_train.select_dtypes(include=['int64', 'float64']).columns
-categorical_features = X_train.select_dtypes(include=['object']).columns
+numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
 
 preprocessor = ColumnTransformer(
     transformers=[
-        ('num', numeric_transformer, numeric_features),
-        ('cat', categorical_transformer, categorical_features)])
+        ('num', numeric_transformer, numeric_features)])
 
 # ## 3.2 Classifier
 # Example:
@@ -202,7 +201,7 @@ grid_params = {
             'MLPClassifier__solver': ['lbfgs', 'sgd', 'adam'],
             'MLPClassifier__hidden_layer_sizes': [(1,)] + [(i,) for i in np.arange(10, 101, 10)],
             'MLPClassifier__learning_rate': ['constant', 'invscaling', 'adaptive'],
-            'MLPClassifier__max_iter': list(np.arange(100, 501, 50)),
+            'MLPClassifier__max_iter': list(np.arange(300, 501, 50)),
             
         }
     }
@@ -216,24 +215,33 @@ for classifier in classifiers:
     # Perform a grid search on the entire pipeline of the current classifier
     # Note: to disable the grid search, comment the following three lines,
     # and call fit() and predict() directly on the pipe object
-    grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
-    grid_clf.fit(X_train, y_train)
+    if (grid_search):
+        grid_clf = GridSearchCV(pipe, grid_params[classifier.__class__.__name__], n_jobs=8)
+        grid_clf.fit(X_train, y_train)
 
-    # best params are stored in the grid_clf.best_params_ object:
-    ## print(grid_clf.best_params_)
+        # best params are stored in the grid_clf.best_params_ object:
+        ## print(grid_clf.best_params_)
     
-    # store the best classifier for each classifier
-    best_pipe = grid_clf.best_estimator_
+        # store the best classifier for each classifier
+        pipe = grid_clf.best_estimator_
 
-    # just a piece of code in case we need access to the classifier in the pipe
-    ## print(best_pipe[classifier.__class__.__name__])
+        # pickle the grid object
+        # Its important to use binary mode 
+        grid_file = open(results_path + gridsearch_name, 'ab') 
+        
+        # source, destination 
+        pickle.dump(grid_clf, grid_file)                      
+        grid_file.close() 
+    else:
+        pipe.fit(X_train, y_train)
 
-    y_pred = best_pipe.predict(X_test)
-    precision, recall, f1, _ =         precision_recall_fscore_support(y_test, y_pred, average='micro')
+    y_pred = pipe.predict(X_test)
+    precision, recall, f1, _ = \
+        precision_recall_fscore_support(y_test, y_pred, average='micro')
 
     result = {
                 'Classifier': classifier.__class__.__name__,
-                'Score': best_pipe.score(X_test, y_test),
+                'Score': pipe.score(X_test, y_test),
                 'Accuracy': accuracy_score(y_test, y_pred),
                 'f1 score': f1,
                 'Precision': precision,
@@ -268,6 +276,9 @@ results_df.index = [''] * len(results_df)
 # # 4. Output
 # ## 4.1 Results
 # Jupyter Notebook
-display(results_df.sort_values(by=['Score'], ascending=False))
+results_df = results_df.sort_values(by=['Score'], ascending=False)
+display(results_df)
+# Save the dataframe
+results_df.to_pickle(results_path + results_name)
+results_df.to_csv(results_path + results_name + '.csv')
 # ## 4.1 Figures
-

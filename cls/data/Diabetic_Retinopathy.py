@@ -2,7 +2,7 @@ import pandas as pd
 from scipy.io.arff import loadarff
 
 def load_diabetic_data():
-    file_path = "./data/Diabetic Retinopathy/messidor_features.arff"
+    file_path = "C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data/Diabetic Retinopathy/messidor_features.arff"
     # path = "ml-course-project-f19\data\Diabetic Retinopathy\messidor_features.arff"
     raw_data = loadarff(file_path) # data type tuple 
 

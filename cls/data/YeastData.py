@@ -1,13 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[8]:
-
-
 import pandas as pd
 
 def load_yeastData():
-    df=df=pd.read_table('yeast.data',sep='\s+',header=None)
+    df=df=pd.read_table('C:/Users/sidha/OneDrive/Documents/ml-course-project-f19/ml-course-project-f19/data/Yeast/yeast.data',sep='\s+',header=None)
     categorical_columns = df.select_dtypes(['category','object']).columns
 
 # convert categorical data to numeric values
@@ -17,8 +11,4 @@ def load_yeastData():
     X=df[df.columns[1:9]]
     y=df[df.columns[9]]
     return X,y
-
-# X,y=load_yeastData()
-# print(y)
-    
 
